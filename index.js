@@ -21,7 +21,7 @@ app.use(express.json());
 app.use(
   cors({
     credentials: true,
-    origin: "https://examination-portal-six.vercel.app",
+    origin: "*",
   })
 );
 app.use(cookieParser());
