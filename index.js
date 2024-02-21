@@ -21,7 +21,7 @@ app.use(express.json());
 app.use(
   cors({
     credentials: true,
-    origin: "https://examination-portal-six.vercel.app",
+    origin: "https://candid-mousse-a08755.netlify.app",
   })
 );
 app.use(cookieParser());
