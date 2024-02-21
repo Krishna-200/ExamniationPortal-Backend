@@ -132,9 +132,14 @@ app.post("/login", async (req, res) => {
       const passOk = bcrypt.compareSync(password, foundUser.password);
       if (passOk) {
         jwt.sign({ userId: foundUser._id }, jwtSecret, {}, (err, token) => {
-          res.cookie("token", token).json({
-            id: foundUser._id,
-          });
+          res
+            .cookie("token", token, {
+              secure: true,
+              sameSite: "none",
+            })
+            .json({
+              id: foundUser._id,
+            });
         });
       } else {
         res.status(401).json("wrong credentials");
@@ -162,9 +167,14 @@ app.post("/Adminlogin", async (req, res) => {
       const passOk = bcrypt.compareSync(password, foundUser.password);
       if (passOk) {
         jwt.sign({ userId: foundUser._id }, jwtSecret, {}, (err, token) => {
-          res.cookie("token", token).json({
-            id: foundUser._id,
-          });
+          res
+            .cookie("token", token, {
+              secure: true,
+              sameSite: "none",
+            })
+            .json({
+              id: foundUser._id,
+            });
         });
       } else {
         res.status(401).json("wrong credentials");
