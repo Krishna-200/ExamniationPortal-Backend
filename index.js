@@ -21,7 +21,7 @@ app.use(express.json());
 app.use(
   cors({
     credentials: true,
-    origin: "https://candid-mousse-a08755.netlify.app",
+    origin: "https://examify.netlify.app",
   })
 );
 app.use(cookieParser());
