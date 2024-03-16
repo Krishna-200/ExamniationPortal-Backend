@@ -14,6 +14,8 @@ const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const sendMail = require("./SendMail");
 const verifyToken = require("./verifyToken");
+const multer = require("multer");
+const path = require("path");
 
 const app = express();
 const bcryptSalt = bcrypt.genSaltSync(10);
@@ -21,10 +23,11 @@ app.use(express.json());
 app.use(
   cors({
     credentials: true,
-    origin: "https://candid-mousse-a08755.netlify.app",
+    origin: "https://examify.netlify.app",
   })
 );
 app.use(cookieParser());
+app.use(express.static("public"));
 
 dotenv.config();
 mongoose.connect(process.env.Mongo_Url).then(() => {
@@ -39,10 +42,22 @@ app.get("/test", (req, res) => {
 
 //User Registration
 
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./public/images");
+  },
+  filename: function (req, file, cb) {
+    cb(null, `${Date.now()}_${file.originalname}`);
+  },
+});
+
+const upload = multer({ storage: storage });
+
 app.post("/SignUp", async (req, res) => {
   //   console.log(jwtSecret);
   const { fullname, rollno, password, gender, year, mail, mobileno } = req.body;
   const hashedPassword = bcrypt.hashSync(password, bcryptSalt);
+  const uploadedFile = req.file;
   try {
     const createduser = await User.create({
       fullname: fullname,
@@ -53,6 +68,7 @@ app.post("/SignUp", async (req, res) => {
       mail: mail,
       mobileno: mobileno,
       role: "user",
+      file: uploadedFile.filename,
     });
     jwt.sign(
       { userId: createduser._id, fullname },
@@ -196,7 +212,7 @@ app.get("/UserPage/:id", async (req, res) => {
   }
 });
 
-// all the user data
+// all the users data
 app.get("/UserDetails", async (req, res) => {
   try {
     const users = await User.find();
@@ -574,8 +590,6 @@ app.get("/UserResult", async (req, res) => {
   const response = await ResultPage.find({ userId: id });
   res.status(200).json(response);
 });
-
-// to store images of users
 
 app.listen(3000, () => {
   console.log("server has been started");
