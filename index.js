@@ -35,6 +35,7 @@ app.use(
     origin: "https://examify.netlify.app",
   })
 );
+app.options("*", cors());
 app.use(cookieParser());
 app.use(express.static("public"));
 
