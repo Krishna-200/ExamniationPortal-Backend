@@ -30,6 +30,7 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(
   cors({
+    methods: ["GET", "POST", "DELETE", "OPTIONS"],
     credentials: true,
     origin: "https://examify.netlify.app",
   })
