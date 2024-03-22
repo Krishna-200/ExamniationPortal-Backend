@@ -62,7 +62,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-app.post("/SignUp", async (req, res) => {
+app.post("/SignUp", upload.single("file"), async (req, res) => {
   //   console.log(jwtSecret);
   const { fullname, rollno, password, gender, year, mail, mobileno } = req.body;
   const hashedPassword = bcrypt.hashSync(password, bcryptSalt);
