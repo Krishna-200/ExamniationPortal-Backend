@@ -14,8 +14,6 @@ const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const sendMail = require("./SendMail");
 const verifyToken = require("./verifyToken");
-const multer = require("multer");
-const path = require("path");
 
 const app = express();
 const bcryptSalt = bcrypt.genSaltSync(10);
@@ -52,22 +50,10 @@ app.get("/test", (req, res) => {
 
 //User Registration
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "./public/images");
-  },
-  filename: function (req, file, cb) {
-    cb(null, `${Date.now()}_${file.originalname}`);
-  },
-});
-
-const upload = multer({ storage: storage });
-
-app.post("/SignUp", upload.single("file"), async (req, res) => {
+app.post("/SignUp", async (req, res) => {
   //   console.log(jwtSecret);
   const { fullname, rollno, password, gender, year, mail, mobileno } = req.body;
   const hashedPassword = bcrypt.hashSync(password, bcryptSalt);
-  const uploadedFile = req.file;
   try {
     const createduser = await User.create({
       fullname: fullname,
@@ -78,7 +64,6 @@ app.post("/SignUp", upload.single("file"), async (req, res) => {
       mail: mail,
       mobileno: mobileno,
       role: "user",
-      file: uploadedFile.filename,
     });
     jwt.sign(
       { userId: createduser._id, fullname },
