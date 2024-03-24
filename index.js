@@ -7,13 +7,14 @@ const OTP = require("./models/Otp");
 const ExamPage = require("./models/ExamPaper");
 const newQuestion = require("./models/Questions");
 const ResultPage = require("./models/Results");
-const Image = require("./models/Image");
+const image = require("./models/Image");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const sendMail = require("./SendMail");
 const verifyToken = require("./verifyToken");
+const multer = require("multer");
 
 const app = express();
 const bcryptSalt = bcrypt.genSaltSync(10);
@@ -583,6 +584,45 @@ app.get("/UserResult", async (req, res) => {
   const { id } = req.query;
   // console.log(id);
   const response = await ResultPage.find({ userId: id });
+  res.status(200).json(response);
+});
+
+// image upload
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./public/images");
+  },
+  filename: function (req, file, cb) {
+    cb(null, `${Date.now()}_${file.originalname}`);
+  },
+});
+
+const upload = multer({ storage: storage });
+
+app.post("/imageUpload", upload.single("file"), async (req, res) => {
+  const { id } = req.query;
+  // console.log(id);
+  const file = req.file;
+
+  // console.log(file);
+
+  if (!file) {
+    return res.status(400).json({ error: "No file uploaded" });
+  }
+
+  const createduser = await image.create({ id, file: file.filename });
+
+  res.status(200);
+});
+
+// to get image
+
+app.get("/getImage", async (req, res) => {
+  const { id } = req.query;
+
+  const response = await image.find({ id });
+  // console.log(response);
   res.status(200).json(response);
 });
 
