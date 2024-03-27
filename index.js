@@ -8,6 +8,7 @@ const ExamPage = require("./models/ExamPaper");
 const newQuestion = require("./models/Questions");
 const ResultPage = require("./models/Results");
 const image = require("./models/Image");
+const Screenshot = require("./models/Screenshot");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -15,6 +16,8 @@ const cookieParser = require("cookie-parser");
 const sendMail = require("./SendMail");
 const verifyToken = require("./verifyToken");
 const multer = require("multer");
+const fs = require("fs");
+const path = require("path");
 
 const app = express();
 const bcryptSalt = bcrypt.genSaltSync(10);
@@ -624,6 +627,55 @@ app.get("/getImage", async (req, res) => {
   const response = await image.find({ id });
   // console.log(response);
   res.status(200).json(response);
+});
+
+// to store screenshots of student image
+
+const ScreenShotsStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./public/ScreenShots");
+  },
+  filename: function (req, file, cb) {
+    cb(null, `${Date.now()}_${file.originalname}`);
+  },
+});
+
+const ScreenShotsUpload = multer({ storage: ScreenShotsStorage });
+app.post(
+  "/saveScreenshots",
+  ScreenShotsUpload.array("screenshots", 5),
+  async (req, res) => {
+    try {
+      const { screenshots } = req.body;
+      const { examId, userId } = req.body;
+
+      const savedScreenshots = await Screenshot.create({
+        userId: userId,
+        examId: examId,
+        images: screenshots.map((screenshot) => ({
+          data: Buffer.from(screenshot, "base64"),
+          contentType: "image/webp",
+        })),
+      });
+
+      res.status(201).send("Screenshots saved successfully.");
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Server Error");
+    }
+  }
+);
+
+// to get screenshots
+
+app.get("/getScreenshots", async (req, res) => {
+  try {
+    const screenshots = await Screenshot.find();
+    res.status(200).json(screenshots);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
 });
 
 app.listen(3000, () => {
