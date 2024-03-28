@@ -641,6 +641,7 @@ const ScreenShotsStorage = multer.diskStorage({
 });
 
 const ScreenShotsUpload = multer({ storage: ScreenShotsStorage });
+
 app.post(
   "/saveScreenshots",
   ScreenShotsUpload.array("screenshots", 5),
@@ -652,10 +653,7 @@ app.post(
       const savedScreenshots = await Screenshot.create({
         userId: userId,
         examId: examId,
-        images: screenshots.map((screenshot) => ({
-          data: Buffer.from(screenshot, "base64"),
-          contentType: "image/webp",
-        })),
+        images: screenshots,
       });
 
       res.status(201).send("Screenshots saved successfully.");
@@ -670,7 +668,11 @@ app.post(
 
 app.get("/getScreenshots", async (req, res) => {
   try {
-    const screenshots = await Screenshot.find();
+    const { examId, userId } = req.query;
+    const screenshots = await Screenshot.find({
+      userId: userId,
+      examId: examId,
+    });
     res.status(200).json(screenshots);
   } catch (error) {
     console.error(error);
