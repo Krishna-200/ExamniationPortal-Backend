@@ -605,10 +605,10 @@ const upload = multer({ storage: storage });
 
 app.post("/imageUpload", upload.single("file"), async (req, res) => {
   const { id } = req.query;
-  // console.log(id);
+  console.log(id);
   const file = req.file;
 
-  // console.log(file);
+  console.log(file);
 
   if (!file) {
     return res.status(400).json({ error: "No file uploaded" });
