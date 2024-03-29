@@ -592,31 +592,14 @@ app.get("/UserResult", async (req, res) => {
 
 // image upload
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "./public/images");
-  },
-  filename: function (req, file, cb) {
-    cb(null, `${Date.now()}_${file.originalname}`);
-  },
-});
-
-const upload = multer({ storage: storage });
-
-app.post("/imageUpload", upload.single("file"), async (req, res) => {
-  const { id } = req.query;
-  console.log(id);
-  const file = req.file;
-
-  console.log(file);
-
-  if (!file) {
-    return res.status(400).json({ error: "No file uploaded" });
+app.post("/imageUpload", async (req, res) => {
+  const { id, image } = req.body;
+  try {
+    await Image.create({ id, image });
+    res.send({ stauts: "ok" });
+  } catch (error) {
+    res.status(404);
   }
-
-  const createduser = await image.create({ id, file: file.filename });
-
-  res.status(200);
 });
 
 // to get image
@@ -624,7 +607,7 @@ app.post("/imageUpload", upload.single("file"), async (req, res) => {
 app.get("/getImage", async (req, res) => {
   const { id } = req.query;
 
-  const response = await image.find({ id });
+  const response = await Image.find({ id });
   // console.log(response);
   res.status(200).json(response);
 });
